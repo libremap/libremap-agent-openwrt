@@ -13,20 +13,23 @@ http://www.apache.org/licenses/LICENSE-2.0
 local libremap = {}
 
 local fs = require 'luci.fs'
+local sys = require 'luci.sys'
 local string = require 'string'
 
 local util = require 'libremap.util'
-
 
 
 --- Gather data for libremap about this router
 function libremap.gather(options)
     options = util.defaults(options, {
         contact = true,
-        hash_macs = true
+        hash_macs = true,
+        hostname = sys.hostname(),
+        lat = 52.1, -- TODO
+        lon = 13.2  -- TODO
     })
 
-    -- load plugins
+    -- load plugins from libremap/plugins/*.lua
     local plugins = {}
     -- ugly: determine path of this module
     local thisPath = string.sub(debug.getinfo(1).source, 2, -5)
@@ -38,6 +41,25 @@ function libremap.gather(options)
             plugins[plugin] = require('libremap.plugins.'..plugin)
         end)
     end
+
+    -- create libremap table
+    local doc = {
+        api_rev = '1.0',
+        type = 'router',
+        hostname = options.hostname,
+        lat = options.lat,
+        lon = options.lon,
+        attributes = {
+            script = 'luci-lib-libremap'
+        }
+    }
+
+    -- let plugins insert data into doc
+    for _, plugin in pairs(plugins) do
+        plugin.insert(doc)
+    end
+
+    return doc
 end
 
 
