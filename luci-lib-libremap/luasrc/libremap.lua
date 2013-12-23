@@ -103,19 +103,7 @@ end
 -- returns the id (new uuid from api_url if no id was given)
 function libremap.submit(api_url, id, doc)
     local olddoc = nil
-    if id==nil then
-        -- no id given -> get uuid from api
-        --[[
-        local response, code, msg = httpc.request_to_buffer(api_url..'/_uuids')
-        if response==nil then
-            error('could not retrieve uuid from API at '..api_url)
-        end
-        newid = json.decode(response).uuids[1]
-        if newid==nil then
-            error('new id is invalid')
-        end
-        ]]--
-    else
+    if id~=nil then
         -- id given -> check if doc is present in db
         local response, code, msg = httpc.request_to_buffer(api_url..'/router/'..id)
         if response==nil then
@@ -145,6 +133,7 @@ function libremap.submit(api_url, id, doc)
         url = url..id
         doc._id = id
         if olddoc~=nil then
+            -- update
             doc._rev = olddoc._rev
             doc.ctime = olddoc.ctime
         end
@@ -154,7 +143,7 @@ function libremap.submit(api_url, id, doc)
     -- send the create/update request
     local response, code, msg = request_to_buffer(url, options)
     if response==nil then
-        error('error updating router document at URL '..url)
+        error('error creating/updating router document at URL '..url)
     end
 
     return id or json.decode(response).id
