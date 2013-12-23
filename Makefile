@@ -50,7 +50,7 @@ define Package/luci-lib-libremap/install
 endef
 
 define Package/luci-app-libremap/install
-  $(INSTALL_DIR) $(1)/usr/sbin
+  $(INSTALL_DIR) $(1)/
   $(CP) ./files/* $(1)/
 endef
 
