@@ -149,7 +149,7 @@ function libremap.submit(api_url, id, doc)
     -- send the create/update request
     local response, code, msg = request_to_buffer(url, options)
     if response==nil then
-        error('error creating/updating router document at URL '..url)
+        error('error creating/updating router document at URL '..url..'; '..msg)
     end
 
     return id or json.decode(response).id
