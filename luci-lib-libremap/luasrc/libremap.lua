@@ -1,5 +1,6 @@
 --[[
 
+Copyright 2013 Patrick Grimm <patrick@lunatiki.de>
 Copyright 2013 André Gaul <gaul@web-yard.de>
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 local libremap = {}
 
 local fs = require 'luci.fs'
+local httpc = require 'luci.httpclient'
+local json = require 'luci.json'
 local sys = require 'luci.sys'
 local string = require 'string'
 
@@ -60,6 +63,20 @@ function libremap.gather(options)
     end
 
     return doc
+end
+
+
+--- Submit a document to the database
+-- return new id if no id was given
+function libremap.submit(api_url, id, doc)
+    -- get uuid from api
+    if id==nil then
+        local response, code, msg = httpc.request_to_buffer(api_url..'/_uuids')
+        if response==nil then
+            error('could not retrieve uuid from API at '..api_url)
+        end
+        id = json.decode(response).uuids[1]
+    end
 end
 
 
