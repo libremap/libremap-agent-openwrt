@@ -8,30 +8,31 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=luci-app-libremap
+PKG_NAME:=luci-lib-libremap
 PKG_RELEASE:=0.1.0
-PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/luci-app-libremap/default
+define Package/luci-lib-libremap/default
   SECTION:=luci
   CATEGORY:=LuCI
-  SUBMENU:=3. Applications
-  MAINTAINER:=André Gaul <gaul@web-yard.de>
+  SUBMENU:=8. Libraries
   URL:=https://github.com/libremap/libremap-agent-openwrt
 endef
 
 define Package/luci-lib-libremap
-  $(call Package/luci-app-libremap/default)
+  $(call Package/luci-lib-libremap/default)
   DEPENDS:=+luci-lib-core +luci-lib-json +luci-lib-httpclient +libuci-lua
-  TITLE:=LibreMap router database and map (library)
+  TITLE:=LibreMap router database and map library
 endef
 
-define Package/luci-app-libremap
-  $(call Package/luci-app-libremap/default)
+define Package/libremap-agent
+  SECTION:=utilities
+  CATEGORY:=Utilities
+  URL:=https://github.com/libremap/libremap-agent-openwrt
+  TITLE:=LibreMap router database and map submit agent
   DEPENDS:=+luci-lib-libremap
-  TITLE:=LibreMap router database and map (submit agent)
 endef
 
 define Build/Prepare
@@ -49,10 +50,10 @@ define Package/luci-lib-libremap/install
   $(CP) $(PKG_BUILD_DIR)/luasrc/libremap/util.lua $(1)/usr/lib/lua/luci/libremap/
 endef
 
-define Package/luci-app-libremap/install
+define Package/libremap-agent/install
   $(INSTALL_DIR) $(1)/
   $(CP) ./files/* $(1)/
 endef
 
 $(eval $(call BuildPackage,luci-lib-libremap))
-$(eval $(call BuildPackage,luci-app-libremap))
+$(eval $(call BuildPackage,libremap-agent))
