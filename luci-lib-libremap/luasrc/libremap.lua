@@ -67,7 +67,7 @@ end
 
 
 --- Submit a document to the database
--- return new id if no id was given
+-- returns the id (new uuid from api_url if no id was given)
 function libremap.submit(api_url, id, doc)
     -- get uuid from api
     if id==nil then
@@ -77,6 +77,8 @@ function libremap.submit(api_url, id, doc)
         end
         id = json.decode(response).uuids[1]
     end
+
+    return id
 end
 
 
