@@ -37,11 +37,13 @@ function libremap.gather(options)
     -- ugly: determine path of this module
     local thisPath = string.sub(debug.getinfo(1).source, 2, -5)
     local files = fs.glob(thisPath..'/plugins/*.lua')
-    -- try to load all modules (ignore silently otherwise)
+    -- try to load all modules
     for _, file in pairs(files) do
-        local plugin = string.sub(fs.basename(file), 0, -5)
+        local name = string.sub(fs.basename(file), 0, -5)
         util.try(function ()
-            plugins[plugin] = require('libremap.plugins.'..plugin)
+            plugins[name] = require('libremap.plugins.'..name)
+        end, function(e)
+            print('warning: unable to load plugin "'..name..'"; '..e)
         end)
     end
 
@@ -58,8 +60,12 @@ function libremap.gather(options)
     }
 
     -- let plugins insert data into doc
-    for _, plugin in pairs(plugins) do
-        plugin.insert(doc)
+    for name, plugin in pairs(plugins) do
+        util.try(function()
+            plugin.insert(doc)
+        end, function(e)
+            print('warning: unable to execute plugin "'..name..'"; '..e)
+        end)
     end
 
     return doc
