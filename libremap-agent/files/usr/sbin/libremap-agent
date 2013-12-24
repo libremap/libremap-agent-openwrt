@@ -2,7 +2,7 @@
 
 -- export LUA_PATH="?;?.lua;/usr/lib/lua/?.lua;/root/luasrc/?.lua"
 
-local libremap = require('libremap')
+local libremap = require('luci.libremap')
 local json = require('luci.json')
 
 local doc = libremap.gather()

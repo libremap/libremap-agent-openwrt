@@ -19,7 +19,7 @@ local json = require 'luci.json'
 local sys = require 'luci.sys'
 local string = require 'string'
 
-local util = require 'libremap.util'
+local util = require 'luci.libremap.util'
 
 
 --- Gather data for libremap about this router
@@ -41,7 +41,7 @@ function libremap.gather(options)
     for _, file in pairs(files) do
         local name = string.sub(fs.basename(file), 0, -5)
         util.try(function ()
-            plugins[name] = require('libremap.plugins.'..name)
+            plugins[name] = require('luci.libremap.plugins.'..name)
         end, function(e)
             print('warning: unable to load plugin "'..name..'"; '..e)
         end)
