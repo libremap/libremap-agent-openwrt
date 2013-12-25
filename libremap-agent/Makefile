@@ -9,7 +9,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-lib-libremap
-PKG_RELEASE:=0.1.1
+PKG_RELEASE:=0.1.2
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
@@ -75,7 +75,7 @@ fi
 endef
 
 # unregister cronjob
-define Package/libremap-agent/postinst
+define Package/libremap-agent/prerm
 #!/bin/sh
 if [ -z $${IPKG_INSTROOT} ] ; then
 	sed -ie '/libremap-agent/d' /etc/crontabs/root
