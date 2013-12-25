@@ -25,6 +25,7 @@ local util = require 'luci.libremap.util'
 --- Gather data for libremap about this router
 function libremap.gather(options)
     options = util.defaults(options, {
+        plugins = {},
         contact = true,
         hash_macs = true,
         hostname = sys.hostname(),
@@ -32,16 +33,14 @@ function libremap.gather(options)
         lon = 13.2  -- TODO
     })
 
-    -- load plugins from libremap/plugins/*.lua
+    -- load plugins from luci.libremap.plugins.*
     local plugins = {}
-    -- ugly: determine path of this module
-    local thisPath = string.sub(debug.getinfo(1).source, 2, -5)
-    local files = fs.glob(thisPath..'/plugins/*.lua')
-    -- try to load all modules
-    for _, file in pairs(files) do
-        local name = string.sub(fs.basename(file), 0, -5)
+    for name, options in pairs(options.plugins) do
         util.try(function ()
-            plugins[name] = require('luci.libremap.plugins.'..name)
+            plugins[name] = {
+                module = require('luci.libremap.plugins.'..name),
+                options = options
+            }
         end, function(e)
             print('warning: unable to load plugin "'..name..'"; '..e)
         end)
@@ -62,7 +61,7 @@ function libremap.gather(options)
     -- let plugins insert data into doc
     for name, plugin in pairs(plugins) do
         util.try(function()
-            plugin.insert(doc)
+            plugin.module.insert(doc, plugin.options)
         end, function(e)
             print('warning: unable to execute plugin "'..name..'"; '..e)
         end)
@@ -107,7 +106,7 @@ end
 
 --- Submit a document to the database
 -- returns the id (new uuid from api_url if no id was given)
-function libremap.submit(api_url, id, doc)
+function libremap.submit(api_url, id, rev, doc)
     local olddoc = nil
     if id~=nil then
         -- id given -> check if doc is present in db
@@ -152,7 +151,7 @@ function libremap.submit(api_url, id, doc)
         error('error creating/updating router document at URL '..url..'; '..msg)
     end
 
-    return id or json.decode(response).id
+    return id or json.decode(response).id, 'revTODO'
 end
 
 

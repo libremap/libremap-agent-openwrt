@@ -1,16 +1,66 @@
 #!/usr/bin/lua
 
-local uci = require('uci')
-local libremap = require('luci.libremap')
+local luci_uci = require 'luci.model.uci'
+local libremap = require 'luci.libremap'
+local util = require 'luci.libremap.util'
 
 local function main()
-    local doc = libremap.gather()
+    -- init uci cursor
+    local uci = luci_uci.cursor_state()
 
+    -- get section
+    local section = uci:get_first('libremap', 'libremap')
+
+    -- get api_urls
+    -- the api_urls are run in order until the submission succeeds
+    local api_urls = uci:get('libremap', section, 'api_url', 'http://libremap.net/api')
+    if type(api_urls)~='table' then
+        api_urls = { api_urls }
+    end
+
+    -- get id and rev (may be nil on first run)
+    local id = uci:get('libremap', section, 'id')
+    local rev = uci:get('libremap', section, 'rev')
+
+    -- get plugins and their options
+    local plugins = {}
+    uci:foreach('libremap', 'plugin', function(sec)
+        local name = sec['.name']
+        print(name)
+        if name and uci:get_bool('libremap', name, 'enabled') then
+            plugins[name] = sec
+        end
+    end)
+
+    -- gather data
+    local doc = libremap.gather({
+        plugins = plugins
+    })
+
+    -- debug: print json
     local json = require('luci.json')
     print(json.encode(doc))
 
-    r = libremap.submit('http://libremap.net/api', 'TODO', doc)
-    print('response: '..r)
+    -- submit to api_url
+    local success = false
+    for _, api_url in ipairs(api_urls) do
+        util.try(function()
+            local new_id, new_rev = libremap.submit(api_url, id, rev, doc)
+            print('success: submitted to '..api_url)
+            -- store id and rev in uci
+            uci:set('libremap', section, 'id', id)
+            uci:set('libremap', section, 'rev', rev)
+            uci:save('libremap')
+            uci:commit('libremap')
+
+            success = true
+        end, function(e)
+            print('error: submission to '..api_url..' failed; '..e)
+        end)
+        if success then
+            break
+        end
+    end
 end
 
 main()

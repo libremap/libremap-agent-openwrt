@@ -61,6 +61,11 @@ define Package/luci-lib-libremap-olsr/install
 	$(CP) $(PKG_BUILD_DIR)/luasrc/libremap/plugins/olsr.lua $(1)/usr/lib/lua/luci/libremap/plugins
 endef
 
+define Package/luci-lib-libremap-location/install
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/libremap/plugins
+	$(CP) $(PKG_BUILD_DIR)/luasrc/libremap/plugins/location.lua $(1)/usr/lib/lua/luci/libremap/plugins
+endef
+
 define Package/libremap-agent/install
 	$(INSTALL_DIR) $(1)/
 	$(CP) ./files/* $(1)/
