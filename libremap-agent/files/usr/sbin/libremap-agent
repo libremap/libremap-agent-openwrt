@@ -1,12 +1,16 @@
 #!/usr/bin/lua
 
--- export LUA_PATH="?;?.lua;/usr/lib/lua/?.lua;/root/luasrc/?.lua"
-
+local uci = require('uci')
 local libremap = require('luci.libremap')
-local json = require('luci.json')
 
-local doc = libremap.gather()
-print(json.encode(doc))
+local function main()
+    local doc = libremap.gather()
 
-r = libremap.submit('http://libremap.net/api', 'wurst', doc)
-print('response: '..r)
+    local json = require('luci.json')
+    print(json.encode(doc))
+
+    r = libremap.submit('http://libremap.net/api', 'TODO', doc)
+    print('response: '..r)
+end
+
+main()

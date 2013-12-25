@@ -9,7 +9,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-lib-libremap
-PKG_RELEASE:=0.1.0
+PKG_RELEASE:=0.1.1
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
@@ -64,6 +64,22 @@ endef
 define Package/libremap-agent/install
 	$(INSTALL_DIR) $(1)/
 	$(CP) ./files/* $(1)/
+endef
+
+# register cronjob
+define Package/libremap-agent/postinst
+#!/bin/sh
+if [ -z $${IPKG_INSTROOT} ] ; then
+	( . /etc/uci-defaults/libremap-agent ) && rm -f /etc/uci-defaults/libremap-agent
+fi
+endef
+
+# unregister cronjob
+define Package/libremap-agent/postinst
+#!/bin/sh
+if [ -z $${IPKG_INSTROOT} ] ; then
+	sed -ie '/libremap-agent/d' /etc/crontabs/root
+fi
 endef
 
 $(eval $(call BuildPackage,luci-lib-libremap))
