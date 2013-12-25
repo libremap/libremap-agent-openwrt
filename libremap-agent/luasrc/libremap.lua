@@ -67,20 +67,20 @@ end
 -- fixed versions from luci.httpclient
 local ltn12 = require "luci.ltn12"
 function request_to_buffer(uri, options)
-    local source, code, msg = request_to_source(uri, options)
+    local source, code, msg, headers = request_to_source(uri, options)
     local output = {}
 
     if not source then
-        return nil, code, msg
+        return nil, code, msg, headers
     end
 
     source, code = ltn12.pump.all(source, (ltn12.sink.table(output)))
 
     if not source then
-        return nil, code
+        return nil, code, nil, headers
     end
 
-    return table.concat(output)
+    return table.concat(output), headers
 end
 function request_to_source(uri, options)
     local status, response, buffer, sock = httpc.request_raw(uri, options)
@@ -91,9 +91,9 @@ function request_to_source(uri, options)
     end
 
     if response.headers["Transfer-Encoding"] == "chunked" then
-        return httpc.chunksource(sock, buffer)
+        return httpc.chunksource(sock, buffer), response.headers
     else
-        return ltn12.source.cat(ltn12.source.string(buffer), sock:blocksource())
+        return ltn12.source.cat(ltn12.source.string(buffer), sock:blocksource()), response.headers
     end
 end
 
@@ -132,6 +132,9 @@ function libremap.submit(api_url, id, rev, doc)
         url = url..id
         doc._id = id
         if olddoc~=nil then
+            if rev~=olddoc._rev then
+                print('warning: revision mismatch ('..rev..' != '..olddoc._rev..')')
+            end
             -- update
             doc._rev = olddoc._rev
             doc.ctime = olddoc.ctime
@@ -140,12 +143,15 @@ function libremap.submit(api_url, id, rev, doc)
     options.body = json.encode(doc)
 
     -- send the create/update request
-    local response, code, msg = request_to_buffer(url, options)
+    local response, code, msg, headers = request_to_buffer(url, options)
     if response==nil then
         error('error creating/updating router document at URL '..url..'; '..msg)
     end
 
-    return id or json.decode(response).id, 'revTODO'
+    -- get new revision
+    local rev = headers['X-Couch-Update-NewRev']
+
+    return id or json.decode(response).id, rev
 end
 
 

@@ -26,7 +26,6 @@ local function main()
     local plugins = {}
     uci:foreach('libremap', 'plugin', function(sec)
         local name = sec['.name']
-        print(name)
         if name and uci:get_bool('libremap', name, 'enabled') then
             plugins[name] = sec
         end
