@@ -11,9 +11,9 @@ http://www.apache.org/licenses/LICENSE-2.0
 ]]--
 
 function insert(doc, options)
-    doc.latitude = options.latitude
-    doc.longitude = options.longitude
-    doc.elev = options.elev
+    doc.lat = tonumber(options.latitude)
+    doc.lon = tonumber(options.longitude)
+    doc.elev = tonumber(options.elev)
 end
 
 return {
