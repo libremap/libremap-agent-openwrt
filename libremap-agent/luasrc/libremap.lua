@@ -26,11 +26,7 @@ local util = require 'luci.libremap.util'
 function libremap.gather(options)
     options = util.defaults(options, {
         plugins = {},
-        contact = true,
-        hash_macs = true,
         hostname = sys.hostname(),
-        lat = 52.1, -- TODO
-        lon = 13.2  -- TODO
     })
 
     -- load plugins from luci.libremap.plugins.*
@@ -51,8 +47,6 @@ function libremap.gather(options)
         api_rev = '1.0',
         type = 'router',
         hostname = options.hostname,
-        lat = options.lat,
-        lon = options.lon,
         attributes = {
             script = 'luci-lib-libremap'
         }
