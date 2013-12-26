@@ -45,15 +45,15 @@ define Package/luci-lib-libremap/install
 endef
 
 
-define Package/luci-lib-libremap-olsr
+define Package/luci-lib-libremap-contact
   $(call Package/luci-lib-libremap/default)
   DEPENDS:=+luci-lib-libremap
-  TITLE:=LibreMap OLSR support
+  TITLE:=LibreMap contact support
 endef
 
-define Package/luci-lib-libremap-olsr/install
+define Package/luci-lib-libremap-contact/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/libremap/plugins
-	$(CP) $(PKG_BUILD_DIR)/luasrc/libremap/plugins/olsr.lua $(1)/usr/lib/lua/luci/libremap/plugins
+	$(CP) $(PKG_BUILD_DIR)/luasrc/libremap/plugins/contact.lua $(1)/usr/lib/lua/luci/libremap/plugins
 endef
 
 
@@ -66,6 +66,30 @@ endef
 define Package/luci-lib-libremap-location/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/libremap/plugins
 	$(CP) $(PKG_BUILD_DIR)/luasrc/libremap/plugins/location.lua $(1)/usr/lib/lua/luci/libremap/plugins
+endef
+
+
+define Package/luci-lib-libremap-olsr
+  $(call Package/luci-lib-libremap/default)
+  DEPENDS:=+luci-lib-libremap
+  TITLE:=LibreMap OLSR support
+endef
+
+define Package/luci-lib-libremap-olsr/install
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/libremap/plugins
+	$(CP) $(PKG_BUILD_DIR)/luasrc/libremap/plugins/olsr.lua $(1)/usr/lib/lua/luci/libremap/plugins
+endef
+
+
+define Package/luci-lib-libremap-system
+  $(call Package/luci-lib-libremap/default)
+  DEPENDS:=+luci-lib-libremap
+  TITLE:=LibreMap system support
+endef
+
+define Package/luci-lib-libremap-system/install
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/libremap/plugins
+	$(CP) $(PKG_BUILD_DIR)/luasrc/libremap/plugins/system.lua $(1)/usr/lib/lua/luci/libremap/plugins
 endef
 
 
@@ -103,6 +127,8 @@ fi
 endef
 
 $(eval $(call BuildPackage,luci-lib-libremap))
-$(eval $(call BuildPackage,luci-lib-libremap-olsr))
+$(eval $(call BuildPackage,luci-lib-libremap-contact))
 $(eval $(call BuildPackage,luci-lib-libremap-location))
+$(eval $(call BuildPackage,luci-lib-libremap-olsr))
+$(eval $(call BuildPackage,luci-lib-libremap-system))
 $(eval $(call BuildPackage,libremap-agent))
