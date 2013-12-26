@@ -75,37 +75,30 @@ function libremap.gather(options)
     return doc
 end
 
--- fixed versions from luci.httpclient
+-- fixed http client function (based on luci.httpclient)
 local ltn12 = require "luci.ltn12"
-function request_to_buffer(uri, options)
-    local source, code, msg, headers = request_to_source(uri, options)
-    local output = {}
 
-    if not source then
-        return nil, code, msg, headers
+--- HTTP request
+-- returns:
+--  response - the response body
+--  code     - HTTP status code
+--  headers  - response headers
+function libremap.http(uri, options)
+    local code, response, buffer, sock = httpc.request_raw(uri, options)
+    if not code then
+        return response, nil, nil
     end
 
-    source, code = ltn12.pump.all(source, (ltn12.sink.table(output)))
-
-    if not source then
-        return nil, code, nil, headers
-    end
-
-    return table.concat(output), code, nil, headers
-end
-function request_to_source(uri, options)
-    local status, response, buffer, sock = httpc.request_raw(uri, options)
-    if not status then
-        return status, response, buffer
-    elseif status < 200 or status >= 300 then
-        return nil, status, buffer
-    end
-
+    local source
     if response.headers["Transfer-Encoding"] == "chunked" then
-        return httpc.chunksource(sock, buffer), nil, nil, response.headers
+        source = httpc.chunksource(sock, buffer)
     else
-        return ltn12.source.cat(ltn12.source.string(buffer), sock:blocksource()), nil, nil, response.headers
+        source = ltn12.source.cat(ltn12.source.string(buffer), sock:blocksource())
     end
+
+    local output = {}
+    ltn12.pump.all(source, (ltn12.sink.table(output)))
+    return table.concat(output), code, response.headers
 end
 
 
@@ -115,8 +108,8 @@ function libremap.submit(api_url, id, rev, doc)
     local olddoc = nil
     if id~=nil then
         -- id given -> check if doc is present in db
-        local response, code, msg = httpc.request_to_buffer(api_url..'/router/'..id)
-        if response==nil then
+        local response, code, headers = libremap.http(api_url..'/router/'..id)
+        if code<200 or code>=300 then
             -- 404 -> everything smooth, create new doc
             if code~=404 then
                 -- other error
@@ -154,9 +147,9 @@ function libremap.submit(api_url, id, rev, doc)
     options.body = json.encode(doc)
 
     -- send the create/update request
-    local response, code, msg, headers = request_to_buffer(url, options)
-    if response==nil then
-        error('error creating/updating router document at URL '..url..'; '..msg)
+    local response, code, headers = libremap.http(url, options)
+    if code<200 or code>=300 then
+        error('error creating/updating router document at URL '..url..'; '..response)
     end
 
     -- get new revision
