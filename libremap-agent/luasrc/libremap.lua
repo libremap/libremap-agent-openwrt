@@ -31,24 +31,35 @@ function libremap.gather(options)
 
     -- load plugins from luci.libremap.plugins.*
     local plugins = {}
+    local plugin_names = {}
+    local i = 1
     for name, options in pairs(options.plugins) do
         util.try(function ()
             plugins[name] = {
                 module = require('luci.libremap.plugins.'..name),
                 options = options
             }
+            plugin_names[i] = name
+            i=i+1
         end, function(e)
             print('warning: unable to load plugin "'..name..'"; '..e)
         end)
     end
 
     -- create libremap table
+    local version = sys.exec('opkg status libremap-agent | grep Version')
+    version = version:match('^Version: (.*)\n')
     local doc = {
         api_rev = '1.0',
         type = 'router',
         hostname = options.hostname,
         attributes = {
-            script = 'luci-lib-libremap'
+            submitter = {
+                name = 'libremap-agent-openwrt',
+                version = version,
+                url = 'https://github.com/libremap/libremap-agent-openwrt',
+                plugins = plugin_names
+            }
         }
     }
 
