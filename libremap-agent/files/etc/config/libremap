@@ -2,8 +2,6 @@
 config libremap
 	list api_url 'http://libremap.net/api/'
 	list api_url 'http://libremap.freifunk.net/api'
-	option id 'TODO'
-	option rev 'revTODO'
 
 config plugin 'location'
 	option enabled '1'
@@ -16,3 +14,5 @@ config plugin 'contact'
 	option name 'Andre Gaul'
 	option email 'gaul@web-yard.de'
 
+config plugin 'system'
+	option enabled '0'
