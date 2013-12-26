@@ -47,8 +47,8 @@ local function main()
             local new_id, new_rev = libremap.submit(api_url, id, rev, doc)
             print('success: submitted to '..api_url)
             -- store id and rev in uci
-            uci:set('libremap', section, 'id', id)
-            uci:set('libremap', section, 'rev', rev)
+            uci:set('libremap', section, 'id', new_id)
+            uci:set('libremap', section, 'rev', new_rev)
             uci:save('libremap')
             uci:commit('libremap')
 

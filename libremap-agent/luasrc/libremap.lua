@@ -80,7 +80,7 @@ function request_to_buffer(uri, options)
         return nil, code, nil, headers
     end
 
-    return table.concat(output), headers
+    return table.concat(output), code, nil, headers
 end
 function request_to_source(uri, options)
     local status, response, buffer, sock = httpc.request_raw(uri, options)
@@ -91,9 +91,9 @@ function request_to_source(uri, options)
     end
 
     if response.headers["Transfer-Encoding"] == "chunked" then
-        return httpc.chunksource(sock, buffer), response.headers
+        return httpc.chunksource(sock, buffer), nil, nil, response.headers
     else
-        return ltn12.source.cat(ltn12.source.string(buffer), sock:blocksource()), response.headers
+        return ltn12.source.cat(ltn12.source.string(buffer), sock:blocksource()), nil, nil, response.headers
     end
 end
 
