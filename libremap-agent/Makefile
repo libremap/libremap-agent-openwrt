@@ -8,8 +8,8 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=luci-lib-libremap
-PKG_RELEASE:=0.1.3
+PKG_NAME:=libremap-agent
+PKG_RELEASE:=0.1.4
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
@@ -104,10 +104,6 @@ endef
 define Package/libremap-agent/install
 	$(INSTALL_DIR) $(1)/
 	$(CP) ./files/* $(1)/
-endef
-
-define Package/conffiles
-/etc/config/libremap
 endef
 
 # register cronjob

@@ -1,7 +1,31 @@
 #!/bin/sh
 
+# hourly crontab entry with random time
 test -f /etc/crontabs/root || touch /etc/crontabs/root
 SEED="$( dd if=/dev/urandom bs=2 count=1 2>&- | hexdump | if read line; then echo 0x${line#* }; fi )"
 MIN="$(( $SEED % 60 ))"
 grep -q "libremap-agent" /etc/crontabs/root || echo "$MIN * * * *        /usr/sbin/libremap-agent" >> /etc/crontabs/root
 /etc/init.d/cron restart
+
+# set config only if it is not yet present
+if [ ! -f /etc/config/libremap ]; then
+    cat > /etc/config/libremap <<EOF
+config libremap
+	list api_url 'http://libremap.net/api/'
+	list api_url 'http://libremap.berlin.freifunk.net/api'
+
+config plugin 'location'
+	option enabled '1'
+	option latitude 'FIXME'
+	option longitude 'FIXME'
+	option elev '0'
+
+config plugin 'contact'
+	option enabled '0'
+	option name 'FIXME'
+	option email 'FIX@ME'
+
+config plugin 'system'
+	option enabled '0'
+EOF
+fi
