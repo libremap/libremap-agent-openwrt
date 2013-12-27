@@ -65,7 +65,7 @@ local function main()
             -- error -> log it!
             nixio.syslog('err', 'submission to '..api_url..' failed')
             nixio.syslog('err', e)
-            print('error: submission to '..api_url..' failed; '..e)
+            print('error: submission to '..api_url..' failed (see syslog)')
         end)
         if success then
             break
