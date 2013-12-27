@@ -18,6 +18,7 @@ local httpc = require 'luci.httpclient'
 local json = require 'luci.json'
 local sys = require 'luci.sys'
 local string = require 'string'
+local nixio = require 'nixio'
 
 local util = require 'luci.libremap.util'
 
@@ -42,7 +43,7 @@ function libremap.gather(options)
             plugin_names[i] = name
             i=i+1
         end, function(e)
-            print('warning: unable to load plugin "'..name..'"; '..e)
+            nixio.syslog('warning', 'unable to load plugin "'..name..'"; '..e)
         end)
     end
 
@@ -68,7 +69,7 @@ function libremap.gather(options)
         util.try(function()
             plugin.module.insert(doc, plugin.options)
         end, function(e)
-            print('warning: unable to execute plugin "'..name..'"; '..e)
+            nixio.syslog('warning', 'unable to execute plugin "'..name..'"; '..e)
         end)
     end
 
@@ -86,7 +87,7 @@ local ltn12 = require "luci.ltn12"
 function libremap.http(uri, options)
     local code, response, buffer, sock = httpc.request_raw(uri, options)
     if not code then
-        return response, nil, nil
+        return response, -1, nil
     end
 
     local source
@@ -137,7 +138,7 @@ function libremap.submit(api_url, id, rev, doc)
         doc._id = id
         if olddoc~=nil then
             if rev~=olddoc._rev then
-                print('warning: revision mismatch ('..rev..' != '..olddoc._rev..')')
+                nixio.syslog('warning', 'revision mismatch ('..rev..' != '..olddoc._rev..')')
             end
             -- update
             doc._rev = olddoc._rev

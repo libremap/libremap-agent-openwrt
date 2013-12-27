@@ -3,8 +3,12 @@
 local luci_uci = require 'luci.model.uci'
 local libremap = require 'luci.libremap'
 local util = require 'luci.libremap.util'
+local nixio = require 'nixio'
 
 local function main()
+    -- init logging
+    nixio.openlog("libremap-agent", "pid")
+
     -- init uci cursor
     local uci = luci_uci.cursor_state()
 
@@ -45,7 +49,11 @@ local function main()
     for _, api_url in ipairs(api_urls) do
         util.try(function()
             local new_id, new_rev = libremap.submit(api_url, id, rev, doc)
+
+            -- success -> shout it out
+            nixio.syslog('info', 'success: submitted to '..api_url)
             print('success: submitted to '..api_url)
+
             -- store id and rev in uci
             uci:set('libremap', section, 'id', new_id)
             uci:set('libremap', section, 'rev', new_rev)
@@ -54,12 +62,17 @@ local function main()
 
             success = true
         end, function(e)
+            -- error -> log it!
+            nixio.syslog('err', 'submission to '..api_url..' failed')
+            nixio.syslog('err', e)
             print('error: submission to '..api_url..' failed; '..e)
         end)
         if success then
             break
         end
     end
+    -- tear down logging
+    nixio.closelog()
 end
 
 main()
