@@ -27,5 +27,8 @@ config plugin 'contact'
 
 config plugin 'system'
 	option enabled '0'
+
+config plugin 'wireless'
+	option enabled '0'
 EOF
 fi
