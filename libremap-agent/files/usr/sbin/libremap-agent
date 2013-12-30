@@ -46,8 +46,8 @@ local function main()
             local new_doc = libremap.gather(plugins, id, rev, old_doc)
 
             -- debug: print json
-            --local json = require('luci.json')
-            --print(json.encode(new_doc))
+            local json = require('luci.json')
+            print(json.encode(new_doc))
 
             -- submit new document
             local new_id, new_rev = libremap.submit(api_url, new_doc)

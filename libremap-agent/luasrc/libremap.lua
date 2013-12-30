@@ -25,7 +25,7 @@ local util = require 'luci.libremap.util'
 
 --- Gather data for libremap about this router
 function libremap.gather(plugins, id, rev, old_doc)
-    plugins = plugins or {}
+    local plugins = plugins or {}
 
     -- check if revisions match
     if old_doc~=nil then
@@ -35,7 +35,7 @@ function libremap.gather(plugins, id, rev, old_doc)
     end
 
     -- load plugins from luci.libremap.plugins.*
-    local plugins = {}
+--    local plugins = {}
     local plugin_names = {}
     local i = 1
     for name, options in pairs(plugins) do
