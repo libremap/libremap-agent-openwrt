@@ -66,11 +66,14 @@ function insert(doc)
    local lat = altermap_node.coords.lat
    local lon = altermap_node.coords.lon
 
--- save location data to the LibreMap config and add it to the doc
-   uci:tset('libremap', 'location', {latitude=lat, longitude=lon})
-   uci:commit('libremap')
+-- add location data to the doc and save it to the LibreMap config
    doc.lat = lat
    doc.lon = lon
+   uci:tset('libremap', 'location', {latitude=lat, longitude=lon})
+
+-- data has been imported, so we disable altarmap plugin
+   uci:set('libremap', 'altermap', 'enabled', 0)
+   uci:commit('libremap')
 
 end
 
