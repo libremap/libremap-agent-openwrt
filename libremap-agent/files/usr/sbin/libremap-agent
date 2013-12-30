@@ -35,20 +35,22 @@ local function main()
         end
     end)
 
-    -- gather data
-    local doc = libremap.gather({
-        plugins = plugins
-    })
-
-    -- debug: print json
-    local json = require('luci.json')
-    print(json.encode(doc))
-
     -- submit to api_url
     local success = false
     for _, api_url in ipairs(api_urls) do
         util.try(function()
-            local new_id, new_rev = libremap.submit(api_url, id, rev, doc)
+            -- get old document (if present)
+            local old_doc = libremap.fetch(api_url, id)
+
+            -- gather data for new document
+            local new_doc = libremap.gather(plugins, id, rev, old_doc)
+
+            -- debug: print json
+            --local json = require('luci.json')
+            --print(json.encode(new_doc))
+
+            -- submit new document
+            local new_id, new_rev = libremap.submit(api_url, new_doc)
 
             -- success -> shout it out
             nixio.syslog('info', 'success: submitted to '..api_url)

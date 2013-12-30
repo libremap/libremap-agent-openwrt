@@ -24,17 +24,21 @@ local util = require 'luci.libremap.util'
 
 
 --- Gather data for libremap about this router
-function libremap.gather(options)
-    options = util.defaults(options, {
-        plugins = {},
-        hostname = sys.hostname(),
-    })
+function libremap.gather(plugins, id, rev, old_doc)
+    plugins = plugins or {}
+
+    -- check if revisions match
+    if old_doc~=nil then
+        if rev~=old_doc._rev then
+            nixio.syslog('warning', 'revision mismatch ('..(rev or 'nil')..' != '..old_doc._rev..')')
+        end
+    end
 
     -- load plugins from luci.libremap.plugins.*
     local plugins = {}
     local plugin_names = {}
     local i = 1
-    for name, options in pairs(options.plugins) do
+    for name, options in pairs(plugins) do
         util.try(function ()
             plugins[name] = {
                 module = require('luci.libremap.plugins.'..name),
@@ -51,9 +55,10 @@ function libremap.gather(options)
     local version = sys.exec('opkg status libremap-agent | grep Version')
     version = version:match('^Version: (.*)\n')
     local doc = {
+        _id = id,
         api_rev = '1.0',
         type = 'router',
-        hostname = options.hostname,
+        hostname = sys.hostname(),
         attributes = {
             submitter = {
                 name = 'libremap-agent-openwrt',
@@ -64,10 +69,15 @@ function libremap.gather(options)
         }
     }
 
+    if old_doc~=nil then
+        doc._rev = old_doc._rev
+        doc.ctime = old_doc.ctime
+    end
+
     -- let plugins insert data into doc
     for name, plugin in pairs(plugins) do
         util.try(function()
-            plugin.module.insert(doc, plugin.options)
+            plugin.module.insert(doc, plugin.options, old_doc)
         end, function(e)
             nixio.syslog('warning', 'unable to execute plugin "'..name..'"; '..e)
         end)
@@ -103,47 +113,45 @@ function libremap.http(uri, options)
 end
 
 
---- Submit a document to the database
--- returns the id (new uuid from api_url if no id was given)
-function libremap.submit(api_url, id, rev, doc)
-    local olddoc = nil
-    if id~=nil then
-        -- id given -> check if doc is present in db
-        local response, code, headers = libremap.http(api_url..'/router/'..id)
-        if code<200 or code>=300 then
-            -- 404 -> everything smooth, create new doc
-            if code~=404 then
-                -- other error
-                error('could not determine if id '..id..' is already available under API at '..api_url..' (code '..(code or 'nil')..')')
-            end
-        else
-            -- doc already present
-            olddoc = json.decode(response)
-        end
+--- Fetch a document from the database
+-- Returns nil if document is not available
+function libremap.fetch(api_url, id)
+    if not id then
+        return nil
     end
 
+    -- id given -> check if doc is present in db
+    local response, code, headers = libremap.http(api_url..'/router/'..id)
+    if code<200 or code>=300 then
+        -- 404 -> everything smooth, create new doc
+        if code~=404 then
+            -- other error
+            error('could not determine if id '..id..' is already available under API at '..api_url..' (code '..(code or 'nil')..')')
+        end
+    else
+        -- doc already present
+        return json.decode(response)
+    end
+    return nil
+end
+
+
+--- Submit a document to the database
+-- returns the id (new uuid from api_url if no id was given)
+function libremap.submit(api_url, doc)
     local options = {
         headers = {
             ["Content-Type"] = "application/json"
         }
     }
     local url = api_url..'/router/'
-    if id==nil then
+    if doc._id==nil then
         -- create new doc
         options.method = 'POST'
     else
         -- update doc (or create if id was given)
         options.method = 'PUT'
-        url = url..id
-        doc._id = id
-        if olddoc~=nil then
-            if rev~=olddoc._rev then
-                nixio.syslog('warning', 'revision mismatch ('..rev..' != '..olddoc._rev..')')
-            end
-            -- update
-            doc._rev = olddoc._rev
-            doc.ctime = olddoc.ctime
-        end
+        url = url..doc._id
     end
     options.body = json.encode(doc)
 
@@ -156,7 +164,7 @@ function libremap.submit(api_url, id, rev, doc)
     -- get new revision
     local rev = headers['X-Couch-Update-NewRev']
 
-    return id or json.decode(response).id, rev
+    return doc._id or json.decode(response).id, rev
 end
 
 
