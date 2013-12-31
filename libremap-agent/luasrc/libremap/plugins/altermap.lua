@@ -74,7 +74,6 @@ function insert(doc)
 -- data has been imported, so we disable altarmap plugin
    uci:set('libremap', 'altermap', 'enabled', 0)
    uci:commit('libremap')
-
 end
 
 

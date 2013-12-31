@@ -10,10 +10,22 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 ]]--
 
-function insert(doc, options)
-    doc.lat = tonumber(options.latitude)
-    doc.lon = tonumber(options.longitude)
-    doc.elev = tonumber(options.elev)
+function insert(doc, options, old_doc)
+    local lat = tonumber(options.latitude)
+    local lon = tonumber(options.longitude)
+    local elev = tonumber(options.elev)
+    if old_doc then
+        if lat == nil or lon == nil then
+            lat = old_doc.lat
+            lon = old_doc.lon
+        end
+        if elev == nil then
+            elev = old_doc.elev
+        end
+    end
+    doc.lat = lat
+    doc.lon = lon
+    doc.elev = elev
 end
 
 return {

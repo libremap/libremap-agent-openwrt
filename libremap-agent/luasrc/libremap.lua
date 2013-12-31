@@ -24,7 +24,7 @@ local util = require 'luci.libremap.util'
 
 
 --- Gather data for libremap about this router
-function libremap.gather(plugins, id, rev, old_doc)
+function libremap.gather(plugins, id, rev, community, old_doc)
     local plugins = plugins or {}
 
     -- check if revisions match
@@ -59,6 +59,7 @@ function libremap.gather(plugins, id, rev, old_doc)
         api_rev = '1.0',
         type = 'router',
         hostname = sys.hostname(),
+        community = community,
         attributes = {
             submitter = {
                 name = 'libremap-agent-openwrt',
@@ -70,6 +71,7 @@ function libremap.gather(plugins, id, rev, old_doc)
     }
 
     if old_doc~=nil then
+        doc._id = old_doc._id
         doc._rev = old_doc._rev
         doc.ctime = old_doc.ctime
     end
@@ -112,7 +114,6 @@ function libremap.http(uri, options)
     return table.concat(output), code, response.headers
 end
 
-
 --- Fetch a document from the database
 -- Returns nil if document is not available
 function libremap.fetch(api_url, id)
@@ -135,6 +136,38 @@ function libremap.fetch(api_url, id)
     return nil
 end
 
+--- Fetch a document from the database by hostname and community
+-- Returns nil if document is not available
+function libremap.fetch_by_name(api_url, community)
+    if not community then
+        return nil
+    end
+
+    local doc = { include_docs=true, keys={{ sys.hostname(), community }} }
+    local options = { method = 'POST' }
+    options.body = json.encode(doc)
+
+    -- community given -> check if doc is present in db
+    local response, code, headers = libremap.http(api_url..'/routers_by_name_community/', options)
+
+    if code<200 or code>=300 then
+        -- 404 -> everything smooth, create new doc
+        if code~=404 then
+            -- other error
+            error('could not determine if router is already present under API at '..api_url..' (code '..(code or 'nil')..')')
+        end
+    else
+        local decoded = json.decode(response)
+        -- doc exists for this hostname + community
+        if # decoded.rows == 1 then
+            local old_doc = decoded.rows[1].value
+            return old_doc
+        else
+            nixio.syslog('warning', 'more than one record matches the criteria. fetch by name aborted.')
+        end
+    end
+    return nil
+end
 
 --- Submit a document to the database
 -- returns the id (new uuid from api_url if no id was given)

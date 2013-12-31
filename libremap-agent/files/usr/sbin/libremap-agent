@@ -25,6 +25,8 @@ local function main()
     -- get id and rev (may be nil on first run)
     local id = uci:get('libremap', section, 'id')
     local rev = uci:get('libremap', section, 'rev')
+    local fetch_by_name = uci:get_bool('libremap', section, 'fetch_by_name')
+    local community = uci:get('libremap', section, 'community')
 
     -- get plugins and their options
     local plugins = {}
@@ -40,15 +42,20 @@ local function main()
     for _, api_url in ipairs(api_urls) do
         util.try(function()
             -- get old document (if present)
-            local old_doc = libremap.fetch(api_url, id)
+            if id then
+                old_doc = libremap.fetch(api_url, id)
+            elseif fetch_by_name == true and community ~= nil then
+                old_doc = libremap.fetch_by_name(api_url, community)
+            end
+            
 
             -- gather data for new document
-            local new_doc = libremap.gather(plugins, id, rev, old_doc)
+            local new_doc = libremap.gather(plugins, id, rev, community, old_doc)
 
             -- debug: print json
             local json = require('luci.json')
-            print(json.encode(new_doc))
-
+            print(json.encode(new_doc)
+)
             -- submit new document
             local new_id, new_rev = libremap.submit(api_url, new_doc)
 
@@ -59,6 +66,21 @@ local function main()
             -- store id and rev in uci
             uci:set('libremap', section, 'id', new_id)
             uci:set('libremap', section, 'rev', new_rev)
+
+            -- if the location data is not set in the config but the doc
+            -- was saved successfully, then location was retrieved from old_doc
+            -- so we save the location to config
+            if not tonumber(uci:get('libremap', 'location', 'latitude')) then
+                uci:set('libremap', 'location', 'latitude', new_doc.lat)
+            end
+            if not tonumber(uci:get('libremap', 'location', 'longitude')) then
+                uci:set('libremap', 'location', 'longitude', new_doc.lon)
+            end
+            -- doc is saved and config updated, so we disable fetch by name
+            if fetch_by_name then
+                uci:set('libremap', section, 'fetch_by_name', 0)
+            end
+
             uci:save('libremap')
             uci:commit('libremap')
 
