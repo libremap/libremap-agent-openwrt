@@ -9,7 +9,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libremap-agent
-PKG_RELEASE:=0.1.4
+PKG_RELEASE:=0.1.5
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
@@ -20,7 +20,7 @@ define Build/Prepare
 endef
 
 define Build/Compile
-	#$(MAKE) -C $(PKG_BUILD_DIR)/luasrc
+	$(MAKE) -C $(PKG_BUILD_DIR)/luasrc
 endef
 
 
