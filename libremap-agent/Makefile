@@ -44,53 +44,33 @@ define Package/luci-lib-libremap/install
 	$(CP) $(PKG_BUILD_DIR)/luasrc/libremap/util.lua $(1)/usr/lib/lua/luci/libremap/
 endef
 
+$(eval $(call BuildPackage,luci-lib-libremap))
 
-define Package/luci-lib-libremap-contact
-  $(call Package/luci-lib-libremap/default)
-  DEPENDS:=+luci-lib-libremap
-  TITLE:=LibreMap contact support
+
+# based on collectd Makefile
+# parameters:
+#  * package name: luci-lib-libremap-$(1)
+#  * package title: LibreMap $(2) plugin
+#  * dependencies (additional to luci-lib-libremap): $(3)
+#  plugin file has to be placed in luasrc/libremap/plugins/$(1).lua
+define BuildPlugin
+  define Package/luci-lib-libremap-$(1)
+    $$(call Package/luci-lib-libremap/default)
+    TITLE:=LibreMap $(2) plugin
+    DEPENDS:=luci-lib-libremap $(3)
+  endef
+  define Package/luci-lib-libremap-$(1)/install
+	$(INSTALL_DIR) $$(1)/usr/lib/lua/luci/libremap/plugins
+	$(CP) $(PKG_BUILD_DIR)/luasrc/libremap/plugins/$(1).lua $$(1)/usr/lib/lua/luci/libremap/plugins
+  endef
+  $$(eval $$(call BuildPackage,luci-lib-libremap-$(1)))
 endef
 
-define Package/luci-lib-libremap-contact/install
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/libremap/plugins
-	$(CP) $(PKG_BUILD_DIR)/luasrc/libremap/plugins/contact.lua $(1)/usr/lib/lua/luci/libremap/plugins
-endef
-
-
-define Package/luci-lib-libremap-location
-  $(call Package/luci-lib-libremap/default)
-  DEPENDS:=+luci-lib-libremap
-  TITLE:=LibreMap location support
-endef
-
-define Package/luci-lib-libremap-location/install
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/libremap/plugins
-	$(CP) $(PKG_BUILD_DIR)/luasrc/libremap/plugins/location.lua $(1)/usr/lib/lua/luci/libremap/plugins
-endef
-
-
-define Package/luci-lib-libremap-olsr
-  $(call Package/luci-lib-libremap/default)
-  DEPENDS:=+luci-lib-libremap
-  TITLE:=LibreMap OLSR support
-endef
-
-define Package/luci-lib-libremap-olsr/install
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/libremap/plugins
-	$(CP) $(PKG_BUILD_DIR)/luasrc/libremap/plugins/olsr.lua $(1)/usr/lib/lua/luci/libremap/plugins
-endef
-
-
-define Package/luci-lib-libremap-system
-  $(call Package/luci-lib-libremap/default)
-  DEPENDS:=+luci-lib-libremap
-  TITLE:=LibreMap system support
-endef
-
-define Package/luci-lib-libremap-system/install
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/libremap/plugins
-	$(CP) $(PKG_BUILD_DIR)/luasrc/libremap/plugins/system.lua $(1)/usr/lib/lua/luci/libremap/plugins
-endef
+$(eval $(call BuildPlugin,altermap,AlterMap,))
+$(eval $(call BuildPlugin,contact,contact,))
+$(eval $(call BuildPlugin,location,location,))
+$(eval $(call BuildPlugin,olsr,olsr,))
+$(eval $(call BuildPlugin,system,system,))
 
 
 define Package/libremap-agent
@@ -122,9 +102,4 @@ if [ -z $${IPKG_INSTROOT} ] ; then
 fi
 endef
 
-$(eval $(call BuildPackage,luci-lib-libremap))
-$(eval $(call BuildPackage,luci-lib-libremap-contact))
-$(eval $(call BuildPackage,luci-lib-libremap-location))
-$(eval $(call BuildPackage,luci-lib-libremap-olsr))
-$(eval $(call BuildPackage,luci-lib-libremap-system))
 $(eval $(call BuildPackage,libremap-agent))
