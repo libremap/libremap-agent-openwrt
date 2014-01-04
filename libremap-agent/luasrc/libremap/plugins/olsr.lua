@@ -60,7 +60,11 @@ function fetch_links(version)
     end
 
     -- retrieve data from jsoninfo
-    local olsr_links = fetch_jsoninfo(ip, '9090', 'links')
+    local jsoninfo = fetch_jsoninfo(ip, '9090', 'links')
+    if not jsoninfo or not jsoninfo.links then
+        return {}, {}
+    end
+    local olsr_links = jsoninfo.links
 
     -- init return values
     local aliases = {}
