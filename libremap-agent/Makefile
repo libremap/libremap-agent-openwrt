@@ -68,6 +68,7 @@ endef
 
 $(eval $(call BuildPlugin,altermap,AlterMap,))
 $(eval $(call BuildPlugin,contact,contact,))
+$(eval $(call BuildPlugin,freifunk,Freifunk,))
 $(eval $(call BuildPlugin,location,location,))
 $(eval $(call BuildPlugin,olsr,olsr,))
 $(eval $(call BuildPlugin,system,system,))
