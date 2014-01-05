@@ -108,7 +108,10 @@ function fetch_links(version)
     local jsoninfo = fetch_jsoninfo(ip, '9090', 'interfaces')
     if jsoninfo and jsoninfo.interfaces then
         for _, interface in ipairs(jsoninfo.interfaces) do
-            aliases[interface['ipv'..version..'Address']] = 1
+            local address = interface['ipv'..version..'Address']
+            if address ~= nil then
+                aliases[address] = 1
+            end
         end
     end
 
