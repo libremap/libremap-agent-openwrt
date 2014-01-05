@@ -48,9 +48,9 @@ end
 
 -- get links for specified ip version (4 or 6)
 function fetch_links(version)
+    -- set variables that depend on ip version
     local ip
     local type
-    -- set variables that depend on ip version
     if version==4 then
         ip = '127.0.0.1' -- for jsoninfo
         type = 'olsr4'   -- type of alias/link
@@ -61,7 +61,7 @@ function fetch_links(version)
         error('ip version '..version..' unknown.')
     end
 
-    -- retrieve data from jsoninfo
+    -- retrieve links data from jsoninfo
     local jsoninfo = fetch_jsoninfo(ip, '9090', 'links')
     if not jsoninfo or not jsoninfo.links then
         return {}, {}
@@ -102,6 +102,14 @@ function fetch_links(version)
             quality = quality,
             attributes = link
         }
+    end
+
+    -- retrieve interfaces data from jsoninfo for aliases
+    local jsoninfo = fetch_jsoninfo(ip, '9090', 'interfaces')
+    if jsoninfo and jsoninfo.interfaces then
+        for _, interface in ipairs(jsoninfo.interfaces) do
+            aliases[interface['ipv'..version..'Address']] = 1
+        end
     end
 
     -- fill in aliases
