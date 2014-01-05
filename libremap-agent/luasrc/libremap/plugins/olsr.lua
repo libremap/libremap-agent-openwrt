@@ -48,13 +48,15 @@ end
 
 -- get links for specified ip version (4 or 6)
 function fetch_links(version)
+    local ip
+    local type
     -- set variables that depend on ip version
     if version==4 then
-        local ip = '127.0.0.1' -- for jsoninfo
-        local type = 'olsr4'   -- type of alias/link
+        ip = '127.0.0.1' -- for jsoninfo
+        type = 'olsr4'   -- type of alias/link
     elseif version==6 then
-        local ip = '::1'
-        local type = 'olsr6'
+        ip = '::1'
+        type = 'olsr6'
     else
         error('ip version '..version..' unknown.')
     end
@@ -104,13 +106,13 @@ function fetch_links(version)
 
     -- fill in aliases
     local aliases_arr = {}
-    for alias, _ in ipairs(aliases) do
+    for alias, _ in pairs(aliases) do
         aliases_arr[#aliases_arr+1] = {
             type = type,
             alias = alias
         }
     end
-    return aliases, links
+    return aliases_arr, links
 end
 
 -- appent array b to array a
