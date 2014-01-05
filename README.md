@@ -14,7 +14,24 @@ The plain `libremap-agent` package only uploads a minimal description of your ro
 * `luci-lib-libremap-system` - Provide information about your router (hostname, hardware, memory)
 
 ## Compilation
-TODO
+Compilation is straight forward if you know openwrt. If you're not familiar with openwrt, then check out these steps:
+
+1. Clone openwrt repo and change into new directory: `git clone git://git.openwrt.org/openwrt.git && cd openwrt`
+2. Add luci and libremap feeds to feeds.conf:
+
+   ```
+src-git luci git://nbd.name/luci.git
+src-git libremap https://github.com/libremap/libremap-agent-openwrt.git
+```
+   and enable them:
+
+   ```
+./scripts/feeds update -a
+./scripts/feeds install -p luci -a
+./scripts/feeds install -p libremap -a
+```
+3. Configure with `make menuconfig`. The `libremap-agent` can be found under *Utilities* and all plugins `luci-lib-libremap-*` can be found under *LuCI / Libraries*.
+4. Run `make`, grab a :coffee: and use your packages under `bin/xxxx/packages/`.
 
 ## Development
 Bug reports and feature requests should be filed as issues in this repository.
