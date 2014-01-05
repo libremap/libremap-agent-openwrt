@@ -13,8 +13,19 @@ if [ ! -f /etc/config/libremap ]; then
 config libremap
 	list api_url 'http://libremap.net/api/'
 	list api_url 'http://libremap.berlin.freifunk.net/api'
-    option fetch_by_name '0'
-    option community 'FIXME'
+	option fetch_by_name '0'
+	option community 'FIXME'
+
+config plugin 'altermap'
+	option enabled '0'
+
+config plugin 'contact'
+	option enabled '0'
+	option name 'FIXME'
+	option email 'FIX@ME'
+
+config plugin 'freifunk'
+	option enabled '0'
 
 config plugin 'location'
 	option enabled '1'
@@ -22,10 +33,8 @@ config plugin 'location'
 	option longitude 'FIXME'
 	option elev '0'
 
-config plugin 'contact'
+config plugin 'olsr'
 	option enabled '0'
-	option name 'FIXME'
-	option email 'FIX@ME'
 
 config plugin 'system'
 	option enabled '0'
