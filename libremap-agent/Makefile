@@ -72,7 +72,7 @@ $(eval $(call BuildPlugin,freifunk,Freifunk,))
 $(eval $(call BuildPlugin,location,location,))
 $(eval $(call BuildPlugin,olsr,olsr,))
 $(eval $(call BuildPlugin,system,system,))
-
+$(eval $(call BuildPlugin,wireless,wireless,))
 
 define Package/libremap-agent
   SECTION:=utilities
