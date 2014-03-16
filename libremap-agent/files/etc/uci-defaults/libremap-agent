@@ -62,6 +62,9 @@ config plugin 'system'
 
 config plugin 'wireless'
 	option enabled '0'
+
+config plugin 'babel'
+	option enabled '0'
 EOF
 }
 
