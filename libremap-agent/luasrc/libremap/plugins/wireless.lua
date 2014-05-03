@@ -47,7 +47,7 @@ local function read_wifilinks()
       for _, net in ipairs(dev:get_wifinets()) do
          local local_mac = ntm:get_interface(net.iwdata.ifname):mac()
          local channel = net:channel()
-         local assoclist = net.iwinfo.assoclist
+         local assoclist = net.iwinfo.assoclist or {}
          for station_mac, link_data in pairs(assoclist) do
             local wifilink = {
                type = "wifi",
