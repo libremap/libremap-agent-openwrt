@@ -1,14 +1,35 @@
 #!/bin/sh
 
-# hourly crontab entry with random time
-test -f /etc/crontabs/root || touch /etc/crontabs/root
-SEED="$( dd if=/dev/urandom bs=2 count=1 2>&- | hexdump | if read line; then echo 0x${line#* }; fi )"
-MIN="$(( $SEED % 60 ))"
-grep -q "libremap-agent" /etc/crontabs/root || echo "$MIN * * * *        /usr/sbin/libremap-agent" >> /etc/crontabs/root
-/etc/init.d/cron restart
+set_coords() {
+	lat="0.00000000000000"
+	lon="0.00000000000000"
+	offset="1000000"
+	
+	seed1="$(dd if=/dev/urandom bs=2 count=1 2>&- | hexdump | if read line; then echo ${line#* }; fi)"
+	seed2="$(dd if=/dev/urandom bs=2 count=1 2>&- | hexdump | if read line; then echo ${line#* }; fi)"
+	c1=$(echo "0x$seed1" | awk '{printf "%d", $1}')
+	c2=$(echo "0x$seed2" | awk '{printf "%d", $1}')
+	
+	lat1="$(echo $lat | cut -d. -f1)"
+	lat2="$(echo $lat | cut -d. -f2)"
+	lon1="$(echo $lon | cut -d. -f1)"
+	lon2="$(echo $lon | cut -d. -f2)"
+	
+	newlat2=$(($c1*$offset+$lat2))
+	newlon2=$(($c2*$offset+$lon2))
+	
+	newlat="$lat1.$newlat2"
+	newlon="$lon1.$newlon2"
+	
+	#echo "$newlat"
+	#echo "$newlon"
+	
+	uci set libremap.location.latitude="$newlat"
+	uci set libremap.location.longitude="$newlon"
+	uci commit
+}
 
-# set config only if it is not yet present
-if [ ! -f /etc/config/libremap ]; then
+create_conf() {
     cat > /etc/config/libremap <<EOF
 config libremap
 	list api_url 'http://libremap.net/api/'
@@ -29,8 +50,8 @@ config plugin 'freifunk'
 
 config plugin 'location'
 	option enabled '1'
-	option latitude 'FIXME'
-	option longitude 'FIXME'
+	option latitude '0.0'
+	option longitude '0.0'
 	option elev '0'
 
 config plugin 'olsr'
@@ -42,4 +63,31 @@ config plugin 'system'
 config plugin 'wireless'
 	option enabled '0'
 EOF
+}
+
+# hourly crontab entry with random time
+test -f /etc/crontabs/root || touch /etc/crontabs/root
+SEED="$( dd if=/dev/urandom bs=2 count=1 2>&- | hexdump | if read line; then echo 0x${line#* }; fi )"
+MIN="$(( $SEED % 60 ))"
+grep -q "libremap-agent" /etc/crontabs/root || echo "$MIN * * * *        /usr/sbin/libremap-agent" >> /etc/crontabs/root
+/etc/init.d/cron restart
+
+# set config only if it is not yet present
+if [ ! -f /etc/config/libremap ]; then
+	create_conf
 fi
+
+# if coords are not defined, configure a random ones near to point 0.0
+[ $(uci get libremap.location.latitude) == "0.0" ] && \
+[ $(uci get libremap.location.longitude) == "0.0" ] && set_coords
+
+# enable plugins if available
+PLUGINS="wireless system freifunk olsr location altermap"
+for p in $PLUGINS; do 
+	if opkg list-installed | grep luci-lib-libremap-$p; then
+		uci set libremap.$p=plugin
+		uci set libremap.$p.enabled=1
+	fi
+done
+uci commit libremap
+
