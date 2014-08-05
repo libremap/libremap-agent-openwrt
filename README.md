@@ -8,6 +8,7 @@ If your openwrt installation uses an opkg repository where the `libremap-agent` 
 opkg update && opkg install libremap-agent
 ```
 The plain `libremap-agent` package only uploads a minimal description of your router to a [LibreMap server](https://github.com/libremap/libremap-api) and you probably want to install some plugins that provide additional information (like community data, links of routing protocols like OLSR or batman-adv, ...). The following plugin packages are available:
+* `luci-lib-libremap-babel` - Gathers links and neighbors information from the babel protocol on the router
 * `luci-lib-libremap-contact` - Provide contact information of the router operator
 * `luci-lib-libremap-location` - Provide latitude/longitude/elevation of the router
 * `luci-lib-libremap-olsr` - Gathers links to OLSR neighbors (IPv4+IPv6) of the router
