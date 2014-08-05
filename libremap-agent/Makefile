@@ -73,6 +73,7 @@ $(eval $(call BuildPlugin,location,location,))
 $(eval $(call BuildPlugin,olsr,olsr,))
 $(eval $(call BuildPlugin,system,system,))
 $(eval $(call BuildPlugin,wireless,wireless,))
+$(eval $(call BuildPlugin,babel,babel,))
 
 define Package/libremap-agent
   SECTION:=utilities
