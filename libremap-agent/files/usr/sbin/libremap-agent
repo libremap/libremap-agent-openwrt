@@ -52,10 +52,19 @@ local function main()
             -- gather data for new document
             local new_doc = libremap.gather(plugins, id, rev, community, old_doc)
 
+            -- convert MAC addresses to uppercase
+            for k, v in pairs( new_doc.links ) do
+                new_doc.links[k].alias_local = string.upper(new_doc.links[k].alias_local)
+                new_doc.links[k].attributes.local_mac = string.upper(new_doc.links[k].attributes.local_mac)
+            end
+            for k, v in pairs( new_doc.aliases ) do
+                new_doc.aliases[k].alias = string.upper(new_doc.aliases[k].alias)
+            end
+
             -- debug: print json
             local json = require('luci.json')
-            print(json.encode(new_doc)
-)
+            print(json.encode(new_doc))
+
             -- submit new document
             local new_id, new_rev = libremap.submit(api_url, new_doc)
 
