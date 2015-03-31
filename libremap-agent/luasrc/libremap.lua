@@ -13,7 +13,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 local libremap = {}
 
-local fs = require 'luci.fs'
+local fs = require 'nixio.fs'
 local httpc = require 'luci.httpclient'
 local json = require 'luci.json'
 local sys = require 'luci.sys'
