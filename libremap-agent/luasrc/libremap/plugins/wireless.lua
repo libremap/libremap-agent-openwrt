@@ -45,7 +45,7 @@ local function read_wifilinks()
    local macs = {}
    for _, dev in ipairs(wifidevs) do
       for _, net in ipairs(dev:get_wifinets()) do
-         local local_mac = ntm:get_interface(net.iwdata.ifname).dev.macaddr
+         local local_mac = string.upper(ntm:get_interface(net.iwdata.ifname).dev.macaddr)
          local channel = net:channel()
          local assoclist = net.iwinfo.assoclist or {}
          for station_mac, link_data in pairs(assoclist) do
