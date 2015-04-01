@@ -9,7 +9,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libremap-agent
-PKG_RELEASE:=0.1.6
+PKG_RELEASE:=0.1.7
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
@@ -34,7 +34,7 @@ endef
 
 define Package/luci-lib-libremap
   $(call Package/luci-lib-libremap/default)
-  DEPENDS:=+luci-lib-core +luci-lib-json +luci-lib-httpclient +libuci-lua
+  DEPENDS:=+luci-base +luci-lib-json +luci-lib-httpclient +libuci-lua
   TITLE:=LibreMap base library
 endef
 
