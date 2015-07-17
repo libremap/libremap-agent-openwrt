@@ -74,6 +74,7 @@ $(eval $(call BuildPlugin,olsr,olsr,))
 $(eval $(call BuildPlugin,system,system,))
 $(eval $(call BuildPlugin,wireless,wireless,))
 $(eval $(call BuildPlugin,babel,babel,))
+$(eval $(call BuildPlugin,bmx6,bmx6,))
 
 define Package/libremap-agent
   SECTION:=utilities

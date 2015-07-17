@@ -65,6 +65,9 @@ config plugin 'wireless'
 
 config plugin 'babel'
 	option enabled '0'
+
+config plugin 'bmx6'
+	option enabled '0'
 EOF
 }
 
