@@ -1,6 +1,6 @@
 --[[
 
-Copyright 2013 Nicolás Echániz <nicoechaniz@altermundi.net>
+Copyright 2013-2015 Nicolás Echániz <nicoechaniz@altermundi.net>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -11,6 +11,13 @@ http://www.apache.org/licenses/LICENSE-2.0
 ]]--
 
 local netm = require "luci.model.network"
+
+function concat_tables(t1,t2)
+    for i=1,#t2 do
+        t1[#t1+1] = t2[i]
+    end
+    return t1
+end
 
 -- TODO: this hardcoded values could be set in the config for the plugin
 -- the current chosen thresholds are Ubiquiti's default for led signal indicator
@@ -84,8 +91,16 @@ function insert(doc)
 
 -- if aliases is not empty, insert aliases and wifilinks data in the doc
    if next(aliases) ~= nil then
-      doc.links = wifilinks
-      doc.aliases = aliases
+       if doc["links"] ~= nil then
+           concat_tables(doc.links, wifilinks)
+       else
+           doc.links = wifilinks
+       end
+       if doc["aliases"] ~= nil then
+           concat_tables(doc.aliases, aliases)
+       else
+           doc.aliases = aliases
+       end
    end
 end
 
