@@ -31,11 +31,14 @@ set_coords() {
 
 create_conf() {
     cat > /etc/config/libremap <<EOF
-config libremap
+config libremap 'settings'
 	list api_url 'http://libremap.net/api/'
 	list api_url 'http://libremap.berlin.freifunk.net/api'
+	option public_url 'http://libremap.net/'
 	option fetch_by_name '0'
 	option community 'FIXME'
+	option community_lat 'FIXME'
+	option community_lon 'FIXME'
 
 config plugin 'altermap'
 	option enabled '0'
