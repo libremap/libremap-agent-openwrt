@@ -93,7 +93,7 @@ endef
 define Package/libremap-agent/postinst
 #!/bin/sh
 if [ -z $${IPKG_INSTROOT} ] ; then
-	( . /etc/uci-defaults/libremap-agent ) && rm -f /etc/uci-defaults/libremap-agent
+	( . /etc/uci-defaults/80_libremap-agent ) && rm -f /etc/uci-defaults/80_libremap-agent
 fi
 endef
 
