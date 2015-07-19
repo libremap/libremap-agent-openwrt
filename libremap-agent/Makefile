@@ -94,7 +94,9 @@ define Package/libremap-agent/postinst
 #!/bin/sh
 if [ -z $${IPKG_INSTROOT} ] ; then
 	( . /etc/uci-defaults/80_libremap-agent ) && rm -f /etc/uci-defaults/80_libremap-agent
+	/etc/init.d/libremap-agent enable
 fi
+exit 0
 endef
 
 # unregister cronjob
@@ -102,7 +104,9 @@ define Package/libremap-agent/prerm
 #!/bin/sh
 if [ -z $${IPKG_INSTROOT} ] ; then
 	sed -ie '/libremap-agent/d' /etc/crontabs/root
+	/etc/init.d/libremap-agent disable
 fi
+exit 0
 endef
 
 $(eval $(call BuildPackage,libremap-agent))
