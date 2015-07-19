@@ -91,7 +91,7 @@ fi
 [ $(uci get libremap.location.longitude) == "0.0" ] && set_coords
 
 # enable plugins if available
-PLUGINS="wireless system freifunk olsr location altermap"
+PLUGINS="wireless system freifunk olsr location altermap babel bmx6"
 for p in $PLUGINS; do 
 	if opkg list-installed | grep luci-lib-libremap-$p; then
 		uci set libremap.$p=plugin
