@@ -9,7 +9,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libremap-agent
-PKG_RELEASE:=0.1.7
+PKG_RELEASE:=0.1.8
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
@@ -93,8 +93,10 @@ endef
 define Package/libremap-agent/postinst
 #!/bin/sh
 if [ -z $${IPKG_INSTROOT} ] ; then
-	( . /etc/uci-defaults/libremap-agent ) && rm -f /etc/uci-defaults/libremap-agent
+	( . /etc/uci-defaults/80_libremap-agent ) && rm -f /etc/uci-defaults/80_libremap-agent
+	/etc/init.d/libremap-agent enable
 fi
+exit 0
 endef
 
 # unregister cronjob
@@ -102,7 +104,9 @@ define Package/libremap-agent/prerm
 #!/bin/sh
 if [ -z $${IPKG_INSTROOT} ] ; then
 	sed -ie '/libremap-agent/d' /etc/crontabs/root
+	/etc/init.d/libremap-agent disable
 fi
+exit 0
 endef
 
 $(eval $(call BuildPackage,libremap-agent))
