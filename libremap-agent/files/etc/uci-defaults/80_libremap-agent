@@ -71,6 +71,9 @@ config plugin 'babel'
 
 config plugin 'bmx6'
 	option enabled '0'
+	
+config plugin 'qmp'
+	option enabled '0'
 EOF
 }
 
