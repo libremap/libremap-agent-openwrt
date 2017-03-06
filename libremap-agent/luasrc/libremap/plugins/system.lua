@@ -11,16 +11,19 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 ]]--
 
-sys = require 'luci.sys'
+sys  = require 'luci.sys'
+util = require 'luci.util'
 
 return {
     insert = function(doc, options)
-        local name, model, memtotal = sys.sysinfo()
-        local system = {
-            name = name:match('[^\n]+'),
-            model = model:match('[^\n]+'),
-            memtotal = memtotal
-        }
+        local sysinfo = util.ubus("system", "info") or { }
+        local sysboard = util.ubus("system", "board") or { }
+
+        local system = { }
+        system["name"] = sysinfo["hostname"]
+        system["model"] = sysboard["system"]
+        system["memtotal"] = sysinfo["memory"]["total"]
+
         doc.attributes = doc.attributes or {}
         doc.attributes.system = system
     end
