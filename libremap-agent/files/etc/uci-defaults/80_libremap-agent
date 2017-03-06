@@ -1,34 +1,5 @@
 #!/bin/sh
 
-set_coords() {
-	lat="0.00000000000000"
-	lon="0.00000000000000"
-	offset="1000000"
-	
-	seed1="$(dd if=/dev/urandom bs=2 count=1 2>&- | hexdump | if read line; then echo ${line#* }; fi)"
-	seed2="$(dd if=/dev/urandom bs=2 count=1 2>&- | hexdump | if read line; then echo ${line#* }; fi)"
-	c1=$(echo "0x$seed1" | awk '{printf "%d", $1}')
-	c2=$(echo "0x$seed2" | awk '{printf "%d", $1}')
-	
-	lat1="$(echo $lat | cut -d. -f1)"
-	lat2="$(echo $lat | cut -d. -f2)"
-	lon1="$(echo $lon | cut -d. -f1)"
-	lon2="$(echo $lon | cut -d. -f2)"
-	
-	newlat2=$(($c1*$offset+$lat2))
-	newlon2=$(($c2*$offset+$lon2))
-	
-	newlat="$lat1.$newlat2"
-	newlon="$lon1.$newlon2"
-	
-	#echo "$newlat"
-	#echo "$newlon"
-	
-	uci set libremap.location.latitude="$newlat"
-	uci set libremap.location.longitude="$newlon"
-	uci commit
-}
-
 create_conf() {
     cat > /etc/config/libremap <<EOF
 config libremap 'settings'
@@ -53,8 +24,8 @@ config plugin 'freifunk'
 
 config plugin 'location'
 	option enabled '1'
-	option latitude '0.0'
-	option longitude '0.0'
+	option latitude 'FIXME'
+	option longitude 'FIXME'
 	option elev '0'
 
 config plugin 'olsr'
@@ -88,10 +59,6 @@ grep -q "libremap-agent" /etc/crontabs/root || echo "$MIN * * * *        /usr/sb
 if [ ! -f /etc/config/libremap ]; then
 	create_conf
 fi
-
-# if coords are not defined, configure a random ones near to point 0.0
-[ $(uci get libremap.location.latitude) == "0.0" ] && \
-[ $(uci get libremap.location.longitude) == "0.0" ] && set_coords
 
 # enable plugins if available
 PLUGINS="wireless system freifunk olsr location altermap babel bmx6"
