@@ -10,6 +10,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libremap-agent
 PKG_RELEASE:=0.1.9
+
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
@@ -75,6 +76,7 @@ $(eval $(call BuildPlugin,system,system,))
 $(eval $(call BuildPlugin,wireless,wireless,))
 $(eval $(call BuildPlugin,babel,babel,))
 $(eval $(call BuildPlugin,bmx6,bmx6,))
+$(eval $(call BuildPlugin,qmp,qmp,))
 
 define Package/libremap-agent
   SECTION:=utilities
