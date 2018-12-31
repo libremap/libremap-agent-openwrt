@@ -37,7 +37,7 @@ config plugin 'system'
 config plugin 'wireless'
 	option enabled '0'
 
-config plugin 'babel'
+config plugin 'babeld'
 	option enabled '0'
 
 config plugin 'bmx6'
